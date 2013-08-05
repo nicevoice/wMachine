@@ -1,0 +1,140 @@
+<html>
+	<head>
+		<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Web-Shell of wMachine</title>
+		<style>
+			body
+			{
+				padding:0;
+				margin:0;
+			}
+			#helpbox
+			{
+				display:none;
+				background-color:rgba(0,0,0,0.8);
+				color:white;
+				/*height:300px;
+				width:400px;*/
+				position:absolute;
+				z-index: 10;
+			}
+			#qstr
+			{
+				/*z-index: 1;*/
+				width:100%;
+				height:25px;
+				/*margin-top:-25px;*/
+			}
+			#btn_send
+			{
+				VISIBILITY:hidden;
+				height:25px;
+				position:absolute;
+			}
+			#output
+			{
+				/*z-index: 0;*/
+				color: white;
+				background-color: black;
+				width:100%;
+				height:100%;
+				/*height:expression(document.body.clientHeight - 25 + "px");*/
+				/*position:absolute;*/
+			}
+		</style>
+		<script type="text/javascript">
+			window.onload = function()
+			{
+				var outputstr = ""
+				var helpbox = document.getElementById("helpbox");
+				var outputbox = document.getElementById("output");
+				var querybox = document.getElementById('qstr');
+				querybox.focus();
+				var btn_send = document.getElementById('btn_send');
+				outputstr += "# MyCrawel WebSocket\n# Establishing Connection...\n"
+				querybox.disabled = true;
+				outputbox.value = outputstr + "\n\n\n\n";
+				var webSocket = new WebSocket("ws://localhost:9000");
+				webSocket.onopen = function()
+				{
+					var timestr = "(" + (new Date()).toTimeString() + ")  ";
+					outputstr += "\n" + timestr + "# Connection Established\n\n# MyCrawel WebSocket\n# Welcome! Type Command and Press Enter to Send\n\n\n";
+					outputbox.value = outputstr + "\n\n\n\n";
+					querybox.disabled = false;
+				}
+				webSocket.onclose = function(e)
+				{
+					var timestr = "(" + (new Date()).toTimeString() + ")  ";
+					outputstr += timestr + "# Connection Lost, Please Refresh\n";
+					outputbox.value = outputstr + "\n\n\n\n";
+					querybox.disabled = true
+				}
+				webSocket.onmessage = function(e)
+				{
+					// outputstr += e.data
+					var r = new RegExp("#","g")
+					// var suf = e.data.replace(r,"<br/>#")
+					// var suf = e.data;
+					var timestr = "(" + (new Date()).toTimeString() + ")  ";
+					var suf = e.data.replace(r,timestr+"#")
+					console.log(suf);
+					if(suf.length>0)outputstr += suf;
+					// console.log("Got echo: " + e.data);
+					outputbox.value = outputstr + "\n\n\n\n";
+				}
+				btn_send.onclick=function()
+				{
+					var timestr = "(" + (new Date()).toTimeString() + ")  ";
+					outputstr += timestr + "# " + querybox.value + "\n";
+					// outputbox.value += outputstr + "\n\n\n\n";
+					if(querybox.value == "show help")
+					{
+						helpbox.style.display="inherit";
+					}
+					else if(querybox.value == "close help")
+					{
+						helpbox.style.display="none";
+					}
+					else
+					{
+						webSocket.send(querybox.value);
+					}					
+					querybox.value="";
+					querybox.focus();
+				}
+				var ppc = setInterval(function(){
+					webSocket.send("query");
+					outputbox.style.height = document.body.clientHeight - 25 + "px";
+					helpbox.style.height = 200;
+					helpbox.style.width = 750;
+					helpbox.style.top = document.body.clientHeight - parseInt(helpbox.style.height) - 25 + "px";
+					helpbox.style.left = document.body.clientWidth - parseInt(helpbox.style.width) + "px";
+					outputbox.scrollTop=outputbox.scrollHeight;
+				},1000);
+				alert("Set Done!");
+			}
+		</script>
+	</head>
+	<body>
+		<div id='helpbox'>
+			□	MyCrawel2.py [cookies.txt相对路径] [uids.txt相对路径] [数据类别字符串]<br/>
+			□	CalcFreq.py [数据类别字符串]<br/>
+			□	MergeFreq.py [数据类别字符串]<br/>
+			□	Filter.py [数据类别字符串] [提取维度数目]<br/>
+			□	GenerateTrainSet.py [来源数据类别字符串] [特征维度定义文件相对路径] [统一值，即LABEL值]<br/>
+			□	MergeTrainSet.py [数据类别字符串]<br/>
+			□	TrainModel.py [数据类别字符串] [训练维度数目]<br/>
+			□	GenerateTestcase.py [来源数据类别字符串] [目标数据类别字符串]<br/>
+			□	SVMPredict.py [模型名称（数据类别字符串）] [测试数据名] [预测点数目]<br/>
+		</div>
+		<!-- <h1>WebSocket Echo Client</h1> -->
+		<!-- <div id="output"></div> -->
+		<textarea id="output" readonly></textarea>
+		<form onsubmit="return false;">
+			<input type='text' id='qstr' placeholder="Enter 'show/close help' for Help"/>
+			<button type="submit" id='btn_send'>
+				Send Command
+			</button>
+		</form>
+	</body>
+</html>
