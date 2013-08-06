@@ -70,36 +70,38 @@ Very Disappointed...
 
 执行示例
 --------
+### 
 	进入MyCrawel文件夹
 	cd MyCrawel/
-
+### 
 	使用根目录的cookies.txt抓取“uids/meishi.txt”中的所有uid的微博，结果存入“data/meishi/”目录中
 	python MyCrawel2.py cookies.txt meishi.txt meishi
-
+### 
 	计算“data/meishi/”目录中每个数据文件的词频，将结果写入到“freqs/meishi/”目录中
 	python CalcFreq.py meishi
 
+### 
 	将“freqs/meishi/”目录中的所有词频文件合并成一个文件并存放于“freqs/”目录中，命名为“meishi.seq”
 	python MergeFreq.py meishi
-
+### 
 	将“freqs/meishi.seq”进行过滤，抽取其中前10000维的数据，生成“freqs/”目录中命名为“freqs/meishi_filtered.seq”文件
 	python Filter.py meishi 10000
-
+### 
 	将“freqs/meishi/”中的所有数据计算其在由“freqs/meishi_filtered.seq”定义的维度上的值，并赋予其标签，存入“input_parts/meishi/”目录中，命名为“meishi_on_meishi_part_1.txt”
 	python GenerateTrainSet.py meishi meishi 1
-
+### 
 	相同步骤完成一个叫caijing的类别，再次生成部分输入数据（省略前序代码），存入“input_parts/meishi/”目录，命名“caijing_on_meishi_part_-1.txt”
 	python GenerateTrainSet.py caijing meishi -1
-
+### 
 	接着可以将两个文件合并，生成“input_full/”目录下的“类别_input.txt”文件
 	python MergeTrainSet.py meishi
-
+### 
 	接着对meishi种类的合成的判定训练数据进行训练，“input_full/类别_input.txt”文件默认作为输入源，默认生成了“models/类别.model”文件
 	python TrainModel.py meishi 10000
-
+### 
 	然后重复上述步骤准备好即将输入接受预测的数据，直到生成了_filtered.seq文件，运行以下脚本生成mates数据在meishi特征维度上的各点数值，得到脚本返回的生成文件名为“testcases/mates_on_meishi_predict_0.txt”文件，记住文件名
 	python GenerateTestcase.py mates meishi
-
+### 
 	最后，进行预测，将mates（包含5个点）全部点在meishi的模型上进行预测，得到输出的预测值列表
 	python SVMPredict.py mates meishi 5
 
